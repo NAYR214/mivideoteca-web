@@ -50,6 +50,7 @@
   <div class="flex flex-1 flex-col gap-3 p-4">
 
     <div class="flex items-start justify-between gap-2">
+
       <header>
         <h3 class="text-lg font-semibold text-slate-900">
           {movie.title}
@@ -60,14 +61,15 @@
         </p>
       </header>
 
-      <!-- FAVORITO -->
+      <!-- FAVORITO ❤️ -->
       <button
         type="button"
         class="text-2xl transition hover:scale-110"
         onclick={handleFavorite}
       >
-        {movie.favorite ? '❤️' : '🤍'}
+        {movie.isFavorite ? '❤️' : '🤍'}
       </button>
+
     </div>
 
     <div class="text-sm text-slate-500">
@@ -76,20 +78,27 @@
       {/if}
     </div>
 
-    <!-- ESTRELLAS -->
+    <!-- ESTRELLAS ⭐ -->
     <div class="flex gap-1 text-2xl">
+
       {#each [1, 2, 3, 4, 5] as star}
+
         <button
           type="button"
           class="transition hover:scale-110"
           onclick={() => handleRating(star)}
         >
-          {star <= (movie.rating ?? 0) ? '⭐' : '☆'}
+          {star <= (movie.rating ?? 0)
+            ? '⭐'
+            : '☆'}
         </button>
+
       {/each}
+
     </div>
 
     {#if showActions}
+
       <div class="mt-3 flex flex-col gap-2 sm:flex-row">
 
         <button
@@ -109,7 +118,9 @@
         </button>
 
       </div>
+
     {/if}
 
   </div>
+
 </article>

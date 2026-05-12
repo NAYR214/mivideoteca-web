@@ -17,7 +17,7 @@ export interface Movie {
   year?: number | null;
 
   // FAVORITO ❤️
-  favorite?: boolean;
+  isFavorite?: boolean;
 
   // RATING ⭐
   rating?: number;
@@ -34,7 +34,7 @@ export interface MoviePayload {
   year: number;
 
   // FAVORITO ❤️
-  favorite?: boolean;
+  isFavorite?: boolean;
 
   // RATING ⭐
   rating?: number;
