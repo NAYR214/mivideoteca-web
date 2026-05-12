@@ -21,11 +21,20 @@ interface RequestOptions {
 
 // Excepción personalizada para errores de API
 export class ApiError extends Error {
+
   status?: number;
   details?: unknown;
 
-  constructor(message: string, options?: { status?: number; details?: unknown }) {
+  constructor(
+    message: string,
+    options?: {
+      status?: number;
+      details?: unknown;
+    }
+  ) {
+
     super(message);
+
     this.name = 'ApiError';
     this.status = options?.status;
     this.details = options?.details;
@@ -34,13 +43,16 @@ export class ApiError extends Error {
 
 // Limpia la URL base
 function sanitizeBaseUrl(url: string): string {
+
   const trimmed = url.trim();
 
   if (!trimmed) {
     return FALLBACK_API_URL;
   }
 
-  return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
+  return trimmed.endsWith('/')
+    ? trimmed.slice(0, -1)
+    : trimmed;
 }
 
 // URL base desde variables de entorno
@@ -49,35 +61,62 @@ const API_BASE_URL = sanitizeBaseUrl(
 );
 
 // Función genérica para peticiones HTTP
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, auth = true } = options;
+async function request<T>(
+  path: string,
+  options: RequestOptions = {}
+): Promise<T> {
+
+  const {
+    method = 'GET',
+    body,
+    auth = true
+  } = options;
 
   const headers = new Headers();
 
   if (body !== undefined) {
-    headers.set('Content-Type', 'application/json');
+    headers.set(
+      'Content-Type',
+      'application/json'
+    );
   }
 
   if (auth) {
+
     const token = authToken.value;
 
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set(
+        'Authorization',
+        `Bearer ${token}`
+      );
     }
   }
 
   let response: Response;
 
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      method,
-      headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+
+    response = await fetch(
+      `${API_BASE_URL}${path}`,
+      {
+        method,
+        headers,
+        body:
+          body !== undefined
+            ? JSON.stringify(body)
+            : undefined,
+      }
+    );
+
   } catch (error) {
-    throw new ApiError('No se pudo conectar con el servidor.', {
-      details: error,
-    });
+
+    throw new ApiError(
+      'No se pudo conectar con el servidor.',
+      {
+        details: error,
+      }
+    );
   }
 
   let payload: unknown = null;
@@ -86,29 +125,45 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     .get('content-type')
     ?.includes('application/json');
 
-  if (response.status !== 204 && isJson) {
+  if (
+    response.status !== 204 &&
+    isJson
+  ) {
+
     try {
+
       payload = await response.json();
+
     } catch (error) {
-      throw new ApiError('El servidor devolvió una respuesta inválida.', {
-        status: response.status,
-        details: error,
-      });
+
+      throw new ApiError(
+        'El servidor devolvió una respuesta inválida.',
+        {
+          status: response.status,
+          details: error,
+        }
+      );
     }
+
   } else if (response.status !== 204) {
+
     payload = await response.text();
   }
 
   if (!response.ok) {
-    const errorPayload = (payload ?? {}) as ApiErrorPayload;
+
+    const errorPayload =
+      (payload ?? {}) as ApiErrorPayload;
 
     const serverMessage =
       typeof errorPayload === 'object'
-        ? errorPayload.error ?? errorPayload.message
+        ? errorPayload.error ??
+          errorPayload.message
         : undefined;
 
     throw new ApiError(
-      serverMessage ?? 'Ocurrió un error inesperado.',
+      serverMessage ??
+        'Ocurrió un error inesperado.',
       {
         status: response.status,
         details: payload,
@@ -120,42 +175,84 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 }
 
 export const api = {
-  // Login
+
+  // LOGIN
   login: (credentials: Credentials) =>
-    request<LoginResponse>('/api/auth/login', {
-      method: 'POST',
-      body: credentials,
-      auth: false,
-    }),
+    request<LoginResponse>(
+      '/api/auth/login',
+      {
+        method: 'POST',
+        body: credentials,
+        auth: false,
+      }
+    ),
 
-  // Registro
+  // REGISTER
   register: (payload: RegisterPayload) =>
-    request<void>('/api/auth/register', {
-      method: 'POST',
-      body: payload,
-      auth: false,
-    }),
+    request<void>(
+      '/api/auth/register',
+      {
+        method: 'POST',
+        body: payload,
+        auth: false,
+      }
+    ),
 
-  // Obtener películas
-  getMovies: () => request<Movie[]>('/api/movies'),
+  // GET MOVIES
+  getMovies: () =>
+    request<Movie[]>('/api/movies'),
 
-  // Crear película
+  // CREATE MOVIE
   createMovie: (payload: MoviePayload) =>
-    request<Movie>('/api/movies', {
-      method: 'POST',
-      body: payload,
-    }),
+    request<Movie>(
+      '/api/movies',
+      {
+        method: 'POST',
+        body: payload,
+      }
+    ),
 
-  // Actualizar película
-  updateMovie: (id: string, payload: MoviePayload) =>
-    request<Movie>(`/api/movies/${id}`, {
-      method: 'PUT',
-      body: payload,
-    }),
+  // UPDATE MOVIE
+  updateMovie: (
+    id: string,
+    payload: MoviePayload
+  ) =>
+    request<Movie>(
+      `/api/movies/${id}`,
+      {
+        method: 'PUT',
+        body: payload,
+      }
+    ),
 
-  // Eliminar película
+  // DELETE MOVIE
   deleteMovie: (id: string) =>
-    request<void>(`/api/movies/${id}`, {
-      method: 'DELETE',
-    }),
+    request<void>(
+      `/api/movies/${id}`,
+      {
+        method: 'DELETE',
+      }
+    ),
+
+  // FAVORITO ❤️
+  toggleFavorite: (id: string) =>
+    request<Movie>(
+      `/api/movies/${id}/favorite`,
+      {
+        method: 'PATCH',
+      }
+    ),
+
+  // RATING ⭐
+  setRating: (
+    id: string,
+    rating: number
+  ) =>
+    request<Movie>(
+      `/api/movies/${id}/rating`,
+      {
+        method: 'PATCH',
+        body: { rating },
+      }
+    ),
 };

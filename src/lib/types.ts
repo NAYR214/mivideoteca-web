@@ -1,4 +1,5 @@
 ﻿// Tipos compartidos entre componentes Svelte y servicios API.
+
 export interface Credentials {
   email: string;
   password: string;
@@ -14,17 +15,29 @@ export interface Movie {
   director: string;
   posterUrl?: string | null;
   year?: number | null;
+
+  // FAVORITO ❤️
+  favorite?: boolean;
+
+  // RATING ⭐
+  rating?: number;
+
   createdAt?: string | null;
   updatedAt?: string | null;
-  // TODO (UD4 - Video): añadir favorite?: boolean
-  // TODO (UD4 - Ejercicio): añadir rating?: number
 }
 
 export interface MoviePayload {
   title: string;
   director: string;
   posterUrl?: string;
+
   year: number;
+
+  // FAVORITO ❤️
+  favorite?: boolean;
+
+  // RATING ⭐
+  rating?: number;
 }
 
 export interface MovieFormSubmit extends MoviePayload {
